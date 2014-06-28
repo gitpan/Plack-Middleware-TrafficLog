@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.68.
+signed via the Module::Signature module, version 0.73.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,42 +14,48 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 198cec4a316b481377ddb6d6b9466a4926e70220 Build.PL
-SHA1 1fa25512bc378a1bcbd21b5996cb9bbaa1d7144b Changes
-SHA1 39d4369e877ca8afd2c5736d89d21b67976f2d07 LICENSE
-SHA1 abd58bf9cf1febbc855ae4d7debda3e5cdc87b6b MANIFEST
-SHA1 ede5fe6c5c33b5e0b3b2707db79afbc3c7b845f3 MANIFEST.SKIP
-SHA1 c86fbc83436e99765d6fea5048d20eb338a5d4c7 META.json
-SHA1 d30c91c16f4a4201a9b609c4f34c2e54cdd9e9c0 META.yml
-SHA1 5b18f77035a0fea794e391e3ea6c5f2d2871d75a Makefile.PL
-SHA1 65dfc3cbd2d64d5d0a2d838c8633e9448ff70c13 README
-SHA1 51f79e219143845251cb5cbde34e0056f505672a README.md
+SHA1 bc1fdd4a05fca08ad2c0c5a41e69785a9411b156 Build.PL
+SHA1 c5d0ca4774eb1414db9bbde72dde9705ad00ef44 Changes
+SHA1 23d9b9d252de7e22ba6aac2f1fe5681d6a9a0820 LICENSE
+SHA1 619ef317e7973c1893198e79b36f8dff8afc20ee MANIFEST
+SHA1 8db1be1ca479d3b130569f025fba70fbe7e7f075 MANIFEST.SKIP
+SHA1 dfae2b0a516777b7e44399a448a6fd41805ecef1 META.json
+SHA1 f6e379dad8efbc89f720aee43db039879ced5367 META.yml
+SHA1 ce6cf8e15bd0ca4350568d1113791da366ec11b9 Makefile.PL
+SHA1 beb4f3843997f83dab37d1ae064dca36387891c4 README
+SHA1 2ecf777a1c372e88b1bcf4a3b122f09060002711 README.md
 SHA1 865ec27aa5051315448dcca9aa6cbe910f03aba0 examples/headers_only.psgi
 SHA1 01be9487cc311aca9e1165ba87cee68a37597e38 examples/log4perl.psgi
 SHA1 fa31419110e8016655acc71d1c458f9e8dc32f50 examples/traffic.l4p
-SHA1 0753f49adf1c31da97760c86ee79b6b5a2128d61 lib/Plack/Middleware/TrafficLog.pm
+SHA1 9a4f95092df1af66faccb448bcd7a5e9193eaf8a lib/Plack/Middleware/TrafficLog.pm
 SHA1 08018fd1718878237bac9ac1775053f6ec003062 t/010_use.t
-SHA1 cc145e0db92f09815d9cd1c92ecb4a8d29ba6440 t/100_trafficlog.t
-SHA1 8259fd967411a9d13ee842b1adb8913153fc39f1 t/test.pl
+SHA1 d16788be7f1bb192720423d683b6fcecbc09e90d t/100_trafficlog.t
 SHA1 90353a99ac0f719b6f3e58029804d8556cedc2ab xt/check_changes.t
 SHA1 1c27e5840b0154e44120bc2edc02fbb507c76819 xt/consistent_version_numbers.t
-SHA1 67bb4c141ea95809f3db2d526ce91d9e6d894756 xt/copyright.t
+SHA1 e1fed43372474e7bd7df44edfd3ca242c218e022 xt/copyright.t
 SHA1 650dccfa9b6f5a98cf731c89041bea8935dbc623 xt/cover.pl
+SHA1 88601c7f543229c6a47c92ec14d4088b4db85385 xt/cpan_changes.t
+SHA1 4f8f90e1c421bfd592e6806ec4d0a75f3d56406a xt/cpan_meta.t
+SHA1 48a67f01c35122165bb633264cba72d984d7a89e xt/dist_manifest.t
 SHA1 f5aac658ae1888964274e68d179413782082b7ad xt/distribution.t
-SHA1 44147122d52fef90ab3a2c65ebba4f89342174f8 xt/kwalitee.t
+SHA1 af47b82dbac975ba494dfe6849d17d1e02941ac6 xt/eol.t
+SHA1 0f31d18a6a5d14438f2b9748183c120449ce2f02 xt/kwalitee.t
 SHA1 6e7f9dde7560793bcb40acc41561e07d163ad6d1 xt/minimumversion.t
+SHA1 1a1cd76027c4cc73ec56beadaf56680bbac1fd4a xt/no_tabs.t
 SHA1 e8daa0c73cfc304c240fad2d2c2b1b628175a89d xt/perlcritic.t
 SHA1 c114c11caa07ed9ee29b285f43aeafe3fd111cdd xt/perlcriticrc
 SHA1 2a9c6eaa7c99bcd501bc1f0d1b34821cb0fd9a3b xt/pod_coverage.t
 SHA1 bef7d46eb5cbc3e67956d4e823ec199f41ab9268 xt/pod_spell.t
 SHA1 2307fbe3bccfcb45bb0ed842fd085f3a3fd2b3c2 xt/pod_spellrc
 SHA1 87cb53d4ad0162a872d5c70013fc41719e030555 xt/pod_syntax.t
+SHA1 f2dd15ffc2836703f46f2622702e1676891eed21 xt/portability_files.t
+SHA1 e2cdce8b800351dd6c742c350673d0a91be459f9 xt/ppport.t
 SHA1 585af2918381a2617be2537d05b114b94fa0a376 xt/profile.pl
 SHA1 a38994922fda6d64e2ee75198fadc464a221fea9 xt/signature.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
+Version: GnuPG v1
 
-iEYEARECAAYFAlAuom8ACgkQhMHHe8CxCluWgQCfckrXL4prSZAETLieBEXwpsWk
-oQcAn3UiBryiOKQajZfGrlt/pOBvUOBG
-=jSn2
+iEYEARECAAYFAlOu09sACgkQhMHHe8CxClvfoACffqNa2XCjjfSxj3fr5Hc4NJHJ
+usIAniNYbgP8wC0SwvAXzRFzxloToalY
+=rLV0
 -----END PGP SIGNATURE-----

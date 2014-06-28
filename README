@@ -6,7 +6,7 @@ SYNOPSIS
       use Plack::Builder;
 
       builder {
-          enable "TrafficLog";
+          enable "TrafficLog", with_body => 1;
       };
 
 DESCRIPTION
@@ -24,6 +24,9 @@ DESCRIPTION
     This module works also with applications which have delayed response. In
     that case each chunk is logged separately and shares the same unique ID
     number and headers.
+
+    The body of request and response is not logged by default. For streaming
+    responses only first chunk is logged by default.
 
 SEE ALSO
     Plack, Plack::Middleware::AccessLog.
@@ -44,7 +47,7 @@ AUTHOR
     Piotr Roszatycki <dexter@cpan.org>
 
 LICENSE
-    Copyright (c) 2012 Piotr Roszatycki <dexter@cpan.org>.
+    Copyright (c) 2012, 2014 Piotr Roszatycki <dexter@cpan.org>.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as perl itself.

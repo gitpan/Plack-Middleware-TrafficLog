@@ -10,7 +10,7 @@ Plack::Middleware::TrafficLog - Log headers and body of HTTP traffic
   use Plack::Builder;
 
   builder {
-      enable "TrafficLog";
+      enable "TrafficLog", with_body => 1;
   };
 
 =head1 DESCRIPTION
@@ -30,6 +30,9 @@ This module works also with applications which have delayed response. In that
 case each chunk is logged separately and shares the same unique ID number and
 headers.
 
+The body of request and response is not logged by default. For streaming
+responses only first chunk is logged by default.
+
 =for readme stop
 
 =cut
@@ -40,11 +43,16 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.0202';
+our $VERSION = '0.0300';
 
 
-use parent qw(Plack::Middleware);
-use Plack::Util::Accessor qw( with_request with_response with_date with_body eol body_eol logger );
+use parent 'Plack::Middleware';
+
+use Plack::Util::Accessor qw(
+    with_request with_response with_date with_body with_all_chunks eol body_eol logger
+    _counter _call_id
+);
+
 
 use Plack::Util;
 
@@ -52,29 +60,34 @@ use Plack::Request;
 use Plack::Response;
 
 use POSIX ();
-use Time::Local ();
+use POSIX::strftime::GNU ();
 use Scalar::Util ();
-
-
-my $tzoffset = POSIX::strftime("%z", localtime) !~ /^[+-]\d{4}$/ && do {
-    my @t = localtime(time);
-    my $s = Time::Local::timegm(@t) - Time::Local::timelocal(@t);
-    sprintf '%+03d%02u', int($s/60/60), $s % (60*60)
-};
 
 
 sub prepare_app {
     my ($self) = @_;
 
     # the default values
-    $self->with_request(1)  unless defined $self->with_request;
-    $self->with_response(1) unless defined $self->with_response;
-    $self->with_date(1)     unless defined $self->with_date;
-    $self->with_body(1)     unless defined $self->with_body;
+    $self->with_request(Plack::Util::TRUE)     unless defined $self->with_request;
+    $self->with_response(Plack::Util::TRUE)    unless defined $self->with_response;
+    $self->with_date(Plack::Util::TRUE)        unless defined $self->with_date;
+    $self->with_body(Plack::Util::FALSE)       unless defined $self->with_body;
+    $self->with_all_chunks(Plack::Util::FALSE) unless defined $self->with_all_chunks;
     $self->body_eol(defined $self->eol ? $self->eol : ' ') unless defined $self->body_eol;
     $self->eol('|')         unless defined $self->eol;
+
+    $self->_counter(0);
 };
 
+
+sub _strftime {
+    my ($self, $fmt, @time) = @_;
+    my $old_locale = POSIX::setlocale(&POSIX::LC_ALL);
+    POSIX::setlocale(&POSIX::LC_ALL, 'C');
+    my $out = POSIX::strftime::GNU::strftime($fmt, @time);
+    POSIX::setlocale(&POSIX::LC_ALL, $old_locale);
+    return $out;
+};
 
 sub _log_message {
     my ($self, $type, $env, $status, $headers, $body) = @_;
@@ -88,27 +101,15 @@ sub _log_message {
 
     my $eol = $self->eol;
     my $body_eol = $self->body_eol;
-    $body =~ s/\n/$body_eol/gs;
-
-    my $strftime = sub {
-        my ($fmt, @time) = @_;
-        $fmt =~ s/%z/$tzoffset/g if $tzoffset;
-        my $old_locale = POSIX::setlocale(&POSIX::LC_ALL);
-        POSIX::setlocale(&POSIX::LC_ALL, 'C');
-        my $out = POSIX::strftime($fmt, @time);
-        POSIX::setlocale(&POSIX::LC_ALL, $old_locale);
-        return $out;
-    };
+    $body =~ s/\015?\012/$body_eol/gs if defined $body_eol;
 
     my $date = $self->with_date
-        ? ('['. $strftime->('%d/%b/%Y:%H:%M:%S %z', localtime) . '] ')
+        ? ('['. $self->_strftime('%d/%b/%Y:%H:%M:%S %z', localtime) . '] ')
         : '';
 
-    $logger->( sprintf
-        "%s[%s] [%s %s %s] [%s] %s%s%s%s%s%s\n",
-
+    $logger->( sprintf "%s[%s] [%s %s %s] [%s] %s%s%s%s%s%s\n",
         $date,
-        Scalar::Util::refaddr $env->{'psgi.input'} || '?',
+        $self->_call_id,
 
         $remote_addr,
         $type eq 'Request ' ? '->' : $type eq 'Response' ? '<-' : '--',
@@ -149,9 +150,12 @@ sub _log_response {
 
     my $status = sprintf 'HTTP/1.0 %s %s', $status_code, defined $status_message ? $status_message : '';
     my $headers = $res->headers;
-    my $body = $self->with_body ? $res->body : '';
-    $body = '' unless defined $body;
-    $body = join '', grep { defined $_ } @$body if ref $body eq 'ARRAY';
+    my $body = '';
+    if ($self->with_body) {
+        $body = $res->content;
+        $body = '' unless defined $body;
+        $body = join '', grep { defined $_ } @$body if ref $body eq 'ARRAY';
+    }
 
     $self->_log_message('Response', $env, $status, $headers, $body);
 };
@@ -159,6 +163,12 @@ sub _log_response {
 
 sub call {
     my ($self, $env) = @_;
+
+    $self->_call_id(sprintf '%015d',
+        time % 2**16 * 2**32 +
+        (Scalar::Util::looks_like_number $env->{REMOTE_PORT} ? $env->{REMOTE_PORT} : int rand 2**16) % 2**16 * 2**16 +
+        $self->_counter % 2**16);
+    $self->_counter($self->_counter + 1);
 
     # Preprocessing
     $self->_log_request($env) if $self->with_request;
@@ -172,9 +182,10 @@ sub call {
         my $seen;
         return sub {
             my ($chunk) = @_;
-            return if not defined $chunk and $seen;
-            $self->_log_response($env, [ $ret->[0], $ret->[1], [$chunk] ] );
-            $seen = 1;
+            return if $seen and not defined $chunk;
+            return $chunk if $seen and not $self->with_all_chunks;
+            $self->_log_response($env, [ $ret->[0], $ret->[1], [$chunk] ]);
+            $seen = Plack::Util::TRUE;
             return $chunk;
         };
     }) : $res;
@@ -222,7 +233,11 @@ The false value disables logging of current date.
 
 =item with_body
 
-The false value disables logging of message's body.
+The true value enables logging of message's body.
+
+=item with_all_chunks
+
+The true value enables logging of every chunk for streaming responses.
 
 =item eol
 
@@ -261,7 +276,7 @@ Piotr Roszatycki <dexter@cpan.org>
 
 =head1 LICENSE
 
-Copyright (c) 2012 Piotr Roszatycki <dexter@cpan.org>.
+Copyright (c) 2012, 2014 Piotr Roszatycki <dexter@cpan.org>.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as perl itself.
