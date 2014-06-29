@@ -3,15 +3,15 @@ require 5.008;
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
-  'EXE_FILES' => [],
   'NAME' => 'Plack::Middleware::TrafficLog',
+  'INSTALLDIRS' => 'site',
   'PREREQ_PM' => {
+                   'POSIX::strftime::Compiler' => 0,
                    'Test::More' => 0,
-                   'POSIX::strftime::GNU' => 0,
                    'Plack' => 0
                  },
-  'VERSION_FROM' => 'lib/Plack/Middleware/TrafficLog.pm',
   'PL_FILES' => {},
-  'INSTALLDIRS' => 'site'
+  'VERSION_FROM' => 'lib/Plack/Middleware/TrafficLog.pm',
+  'EXE_FILES' => []
 )
 ;
